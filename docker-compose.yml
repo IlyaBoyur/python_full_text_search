@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  search_engine:
+    image: bitnami/elasticsearch:${ELASTIC_VERSION:-8.12.2}
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
