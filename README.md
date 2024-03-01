@@ -55,5 +55,45 @@ POST /table/_doc/
   "text_field": "my pretty text",
   "number": 15
 }
+# Сохранить данные по идентификатору
+GET /table/_doc/-gEW940BVK3mpl69nyKn
+# Обновить данные по идентификатору
+POST /table/_doc/-gEW940BVK3mpl69nyKn
+{
+  "text_field": "my pretty text",
+  "number": 16
+}
+# Искать
+GET /table/_search
+# Искать по условиям фильтрации
+GET /table/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "number": {
+              "gt": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+# Искать с помощью движка SQL.
+# table дан в кавычках, потому что это служебное слово для SQL-запросов в Elasticsearch
+POST /_sql?format=txt
+{
+  "query": """SELECT * FROM "table" WHERE number > 10"""
+}
+# Перевести SQL в язык запросов Elasticsearch.
+POST /_sql/translate
+{
+"query": """SELECT * FROM "table" WHERE number > 10"""
+}
+# Проверить существует ли запись
+HEAD my-index-000001/_doc/0
 ```
 
