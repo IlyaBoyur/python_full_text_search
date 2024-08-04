@@ -24,76 +24,16 @@
 
 
 ## Быстрый старт
-1. Поднять Elasticsearch + Kibana
+### 1. Поднять Elasticsearch + Kibana
 ```bash
 docker compose up -d --remove-orphans
-``` 
-2. Зайти в Dev Tools  
-Вбить в поисковую строку браузера:  
-```http://localhost:5601/app/dev_tools#/console```
-
-
-## Примеры работы с Kibana Dev Tools 
-```bash
-# Создать индекс
-PUT /table
-{
-  "mappings": {
-    "properties": {
-      "text_field": {
-        "type": "keyword"
-      },
-      "number": {
-        "type": "long"
-      }
-    }
-  }
-}
-# Сохранить данные
-POST /table/_doc/
-{
-  "text_field": "my pretty text",
-  "number": 15
-}
-# Сохранить данные по идентификатору
-GET /table/_doc/-gEW940BVK3mpl69nyKn
-# Обновить данные по идентификатору
-POST /table/_doc/-gEW940BVK3mpl69nyKn
-{
-  "text_field": "my pretty text",
-  "number": 16
-}
-# Искать
-GET /table/_search
-# Искать по условиям фильтрации
-GET /table/_search
-{
-  "query": {
-    "bool": {
-      "filter": [
-        {
-          "range": {
-            "number": {
-              "gt": 10
-            }
-          }
-        }
-      ]
-    }
-  }
-}
-# Искать с помощью движка SQL.
-# table дан в кавычках, потому что это служебное слово для SQL-запросов в Elasticsearch
-POST /_sql?format=txt
-{
-  "query": """SELECT * FROM "table" WHERE number > 10"""
-}
-# Перевести SQL в язык запросов Elasticsearch.
-POST /_sql/translate
-{
-"query": """SELECT * FROM "table" WHERE number > 10"""
-}
-# Проверить существует ли запись
-HEAD my-index-000001/_doc/0
 ```
 
+### 2. Elasticsearch SQL CLI
+```bash
+docker compose exec -it elasticsearch elasticsearch-sql-cli
+```
+
+### 3. Dev Tools  
+Вбить в поисковую строку браузера:  
+```http://localhost:5601/app/dev_tools#/console```
