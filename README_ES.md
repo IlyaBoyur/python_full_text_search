@@ -22,7 +22,7 @@ PUT /table
 # Подготовка: Добавить документы
 POST /table/_doc/
 {"text_field": "my pretty text", "number": 15}
-# Сохранить данные по идентификатору
+# Получить данные по идентификатору
 GET /table/_doc/-gEW940BVK3mpl69nyKn
 # Обновить данные по идентификатору
 POST /table/_doc/-gEW940BVK3mpl69nyKn
