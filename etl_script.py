@@ -191,7 +191,6 @@ class ESLoader:
     def __init__(self, url="", index=""):
         self.url = url
         self.index = index
-        self._loaded = set()
 
     def _prepare_bulk_query(self, data: list[FilmES]) -> str:
         """
@@ -209,13 +208,6 @@ class ESLoader:
             )
             + "\n"
         )
-
-    @property
-    def loaded(self):
-        return self._loaded
-
-    def update_loaded(self, data):
-        self._loaded.add(data)
 
     def bulk_load(self, data: list[FilmES]) -> None:
         payload = self._prepare_bulk_query(data)
