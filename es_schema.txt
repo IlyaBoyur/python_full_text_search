@@ -1,7 +1,9 @@
 curl -XPUT http://127.0.0.1:9200/movies -H 'Content-Type: application/json' -d'
 {
   "settings": {
+    // при сохранении данных обновляет индекс раз в секунду
     "refresh_interval": "1s",
+    // задаются все настройки для полнотекстового поиска: фильтры и анализаторы
     "analysis": {
       "filter": {
         "english_stop": {
@@ -41,6 +43,7 @@ curl -XPUT http://127.0.0.1:9200/movies -H 'Content-Type: application/json' -d'
     }
   },
   "mappings": {
+    // защищает от невалидных данных
     "dynamic": "strict",
     "properties": {
       "id": {
@@ -56,6 +59,7 @@ curl -XPUT http://127.0.0.1:9200/movies -H 'Content-Type: application/json' -d'
         "type": "text",
         "analyzer": "ru_en",
         "fields": {
+        // title.raw нужно для сортировки в ES
           "raw": { 
             "type":  "keyword"
           }
@@ -66,6 +70,7 @@ curl -XPUT http://127.0.0.1:9200/movies -H 'Content-Type: application/json' -d'
         "analyzer": "ru_en"
       },
       "directors_names": {
+        // упрощает запросы на поиск
         "type": "text",
         "analyzer": "ru_en"
       },
@@ -78,6 +83,7 @@ curl -XPUT http://127.0.0.1:9200/movies -H 'Content-Type: application/json' -d'
         "analyzer": "ru_en"
       },
       "directors": {
+        // помогает валидировать вложенные json-объекты
         "type": "nested",
         "dynamic": "strict",
         "properties": {
