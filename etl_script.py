@@ -3,8 +3,10 @@ import json
 import logging
 import os
 import sqlite3
+import time
 from dataclasses import dataclass, asdict
-from typing import Any
+from functools import wraps
+from typing import Any, Callable
 from dotenv import load_dotenv
 
 import requests
@@ -143,7 +145,7 @@ class SQLiteExtractor:
                         "films": films,
                         **self._extract_film_data([film.id for film in films]),
                     }
-                    logger.info("DATA FETCHED: %s", result)
+                    logger.debug("DATA FETCHED: %s", result)
                     yield result
                 else:
                     break
@@ -181,7 +183,7 @@ class SQLite2ESTransformer:
                     writers=[asdict(writer) for writer in writers],
                 )
             )
-        logger.info("DATA TRANSFORMED: %s", "\n".join(str(el) for el in transformed))
+        logger.debug("DATA TRANSFORMED: %s", transformed)
         return transformed
 
 
@@ -215,16 +217,15 @@ class ESLoader:
     def update_loaded(self, data):
         self._loaded.add(data)
 
-    def bulk_load(self, data: list[FilmES]):
+    def bulk_load(self, data: list[FilmES]) -> None:
         payload = self._prepare_bulk_query(data)
-        logger.info("DATA BEFORE LOADING: %s", payload)
+        logger.debug("DATA BEFORE LOADING: %s", payload)
         try:
             response = requests.post(
                 f"{self.url}/_bulk",
                 data=payload,
                 headers={"Content-Type": "application/x-ndjson"},
             )
-            print(response.json())
         except requests.RequestException as error:
             logger.error("Connection with ES failed")
             raise RuntimeError(error)
@@ -234,7 +235,7 @@ class ESLoader:
             if error_message := item["index"].get("error"):
                 logger.error(error_message)
 
-        logger.info(
+        logger.debug(
             "DATA LOADED: %s",
             [
                 item["index"]["_id"]
@@ -278,7 +279,7 @@ class ETL:
 if __name__ == "__main__":
     logging.basicConfig(
         format="[%(levelname)s] - %(asctime)s - %(message)s",
-        level=logging.WARNING,
+        level=logging.INFO,
         datefmt="%H:%M:%S",
     )
     with contextlib.closing(sqlite3.connect(DB_NAME)) as connection:
