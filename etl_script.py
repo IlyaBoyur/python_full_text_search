@@ -249,6 +249,16 @@ class ETL:
         self.extractor = extractor
         self.transformer = transformer
         self.loader = loader
+    
+    @staticmethod
+    def timeit(func: Callable) -> Callable:
+        @wraps(func)
+        def inner(self, *args, **kwargs) -> Any:
+            start = time.time()
+            result = func(self, *args, **kwargs)
+            logger.info(f"Elapsed in: {time.time()-start} seconds")
+            return result
+        return inner
 
     def bulk_generator(self, bulk_size):
         yield from self.extractor.bulk_generator(bulk_size=bulk_size)
@@ -259,6 +269,7 @@ class ETL:
     def bulk_load(self, data):
         return self.loader.bulk_load(data=data)
 
+    @timeit
     def do(self):
         for bulk in self.bulk_generator(bulk_size=BULK_SIZE):
             self.bulk_load(self.transform(bulk))
