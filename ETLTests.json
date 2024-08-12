@@ -206,7 +206,7 @@
 							"pm.test(\"Compare writers_names\", function() {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData['hits']['total']['value']).to.equal(1);",
-							"    pm.expect(jsonData['hits']['hits'][0]['_source']['writers_names']).to.eql([\"Craig Hutchinson\"]);",
+							"    pm.expect(jsonData['hits']['hits'][0]['_source']['writers_names']).to.eql(\"Craig Hutchinson\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -256,7 +256,7 @@
 							"pm.test(\"Compare director\", function() {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData['hits']['total']['value']).to.equal(1);",
-							"    pm.expect(jsonData['hits']['hits'][0]['_source']['director']).to.be.null;",
+							"    pm.expect(jsonData['hits']['hits'][0]['_source']['director']).to.eql([]);",
 							"});"
 						],
 						"type": "text/javascript"
