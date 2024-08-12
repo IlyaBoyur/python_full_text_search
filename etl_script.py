@@ -72,21 +72,6 @@ class FilmES:
     writers: list[dict]
 
 
-# def retry_block(func, *args, **kwargs):
-#     retries = 3
-#     ok = False
-#     while (retries and not ok):
-#         try:
-#             result = func(*args, **kwargs)
-#             ok = True
-#         except Exception:
-#             retries -= 1
-#             logger.warning(f"Retry attempts left: {retries}")
-#     if not ok:
-#         raise Exception
-#     return result
-
-
 class SQLiteExtractor:
     def __init__(self, connection: sqlite3.Connection) -> None:
         self.connection = connection
@@ -150,10 +135,7 @@ class SQLiteExtractor:
             film_cursor = cursor.execute(
                 "SELECT id, title, description, rating FROM film_work;"
             )
-            test = 0
             while True:
-                if test > 0:
-                    break
                 bulk = film_cursor.fetchmany(size=bulk_size or cursor.arraysize)
                 if bulk:
                     films = [FilmWorkSQL(*record) for record in bulk]
@@ -163,7 +145,6 @@ class SQLiteExtractor:
                     }
                     logger.info("DATA FETCHED: %s", result)
                     yield result
-                    test += 1
                 else:
                     break
 
@@ -235,8 +216,6 @@ class ESLoader:
         self._loaded.add(data)
 
     def bulk_load(self, data: list[FilmES]):
-        # logger.info("DATA LOADED: not yet")
-        # return
         payload = self._prepare_bulk_query(data)
         logger.info("DATA BEFORE LOADING: %s", payload)
         try:
@@ -260,7 +239,7 @@ class ESLoader:
             [
                 item["index"]["_id"]
                 for item in json_response["items"]
-                if item["index"]["status"] == 200
+                if item["index"]["status"] in (200, 201)
             ],
         )
 
@@ -288,7 +267,7 @@ class ETL:
 if __name__ == "__main__":
     logging.basicConfig(
         format="[%(levelname)s] - %(asctime)s - %(message)s",
-        level=logging.DEBUG,
+        level=logging.WARNING,
         datefmt="%H:%M:%S",
     )
     with contextlib.closing(sqlite3.connect(DB_NAME)) as connection:
