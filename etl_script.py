@@ -5,8 +5,11 @@ import os
 import sqlite3
 from dataclasses import dataclass, asdict
 from typing import Any
+from dotenv import load_dotenv
 
 import requests
+
+load_dotenv()
 
 
 DB_NAME = os.environ.get("DB_NAME", "db.sqlite")
