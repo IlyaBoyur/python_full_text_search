@@ -1,73 +1,77 @@
-# Full Text Search App in Python
+# Full text search App
 
-Реляционные БД не подходят для поиска:
-- Не предназначены для массовых операций чтения над ними из-за их архитектуры.
-- Требуют аккуратной работы при поиске по данным. Необходимо построить индексы, проверить запросы — любая ошибка условий в запросах будет сильно замедлять их.
-- Такой поиск будет лишен нечёткого поиска, поиска синонимов и стоп-слов, автодополнения, поддержки нескольких языков
-- PostgreSQL требует вдумчивого создания индексов и умения оптимизировать запросы, чтобы получить наибольшую производительность.
-- PostgreSQL плохо масштабируется на запись. Выход из строя master-сервера сразу же рушит всю систему. Вы не сможете добавлять новые объекты, но поиск будет работать. Реплики в этом случае не помогут.
+## Technologies
+#### Python3.12, Flask, SQLite, Elasticsearch
 
-Сервис полнотекстового поиска:
-- должен выдерживать высокую нагрузку от пользователей
-- обладать гибкими настройками поиска по документам 
-- сохранять при этом приемлемое время ответа
-
-поэтому нужно использовать специализированные БД — _поисковые движки_.
-
-**Elasticsearch** выгодно отличается от других поисковых движков:  
-Плюсы:  
-- Относительная простота установки: готовый docker-образ
-- Масштабирование: реплики, шарды, кластер серверов (до 2-3 млн RPS на запись)
-- Поисковый движок Apache Lucene: полнотекстовый поиск, нечеткий поиск
-- Интерфейс RESTful API
-Минусы:  
-- Ресурсы (из-за JVM)
-- Недостаток безопасности
-- Поломки при переходе между мажорными версиями
+### Service includes:
+- SQLite database with legacy data
+- ETL-script (Extract, transform, load), which migrates data SQLite -> Elasticsearch.
+- Flask API endpoints
 
 
-## Быстрый старт
-### 1. Поднять Elasticsearch + Kibana
+## Quick start
+### 1. Start up Elasticsearch + Kibana
 ```bash
 docker compose up -d --remove-orphans
 ```
 
-### 2. Elasticsearch SQL CLI
+### 3. Create & activate virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run ETL (SQLite -> Elasticsearch)
+```bash
+python3 etl_script.py
+```
+
+### 5. Start up API server
+```bash
+python3 server.py
+```
+
+### 6. Checkout APIs 
+```
+http://localhost:8000/
+```
+
+### Additional
+#### Go inspect created indexes in ES
 ```bash
 docker compose exec -it elasticsearch elasticsearch-sql-cli
 ```
-
-### 3. Dev Tools  
-Вбить в поисковую строку браузера:  
-```http://localhost:5601/app/dev_tools#/console```
-
-
-### Сервис полнотекстового поиска включает
-- БД SQLite c legacy данными
-- ETL-скрипт (Extract, transform, load), который отвечает за миграцию данных SQLite -> Elasticsearch.
-- эндпоинты API на Flask
+#### Check out Kibana Dev Tools
+Enter in web browser query string:  
+```
+http://localhost:5601/app/dev_tools#/console
+```
 
 
 ### Документация API
 
-- Получение списка всех видеофайлов, которые есть в БД:
+- List video files in DB:
 ```
-/api/v1/video/collection?limit=50&page=int&search=str&sort=str&sort_order=str
+GET /api/v1/movies?limit=50&page=int&search=str&sort=str&sort_order=str
 
-// search — поиск с учётом морфологии по атрибутам фильма
-(название, описание, режиссёр и т.д.).
-// limit — количество элементов в выдаче.
-// page — страница в выдаче.
-// sort — сортировка по определённому полю.
-// sort_order — направление сортировки.
-```
-
-- Получение карточки одного конкретного видеофайла:
-```
-/api/v1/video/get/<id:str>
+// search — full text search (title, description, directors, etc).
+// limit — number of files in response.
+// page — page number.
+// sort — sorting field.
+// sort_order — sorting direction (asc, desc).
 ```
 
-- Получение информации о клиенте:
+- Get video file detail:
 ```
-/client/info
+GET /api/v1/movies/<movie_id>
+```
+
+- Get client info:
+```
+GET /client/info
 ```
