@@ -45,17 +45,17 @@ class PersonES:
 
 
 @dataclass
-class Actor(PersonES):
+class ActorES(PersonES):
     ...
 
 
 @dataclass
-class Director(PersonES):
+class DirectorES(PersonES):
     ...
 
 
 @dataclass
-class Writer(PersonES):
+class WriterES(PersonES):
     ...
 
 
@@ -157,15 +157,15 @@ class SQLite2ESTransformer:
         for film in data["films"]:
             persons = data["persons"]
             actors = [
-                Actor(id=id_, name=persons[id_].full_name)
+                ActorES(id=id_, name=persons[id_].full_name)
                 for id_ in data["film_actors"].get(film.id, [])
             ]
             directors = [
-                Director(id=id_, name=persons[id_].full_name)
+                DirectorES(id=id_, name=persons[id_].full_name)
                 for id_ in data["film_directors"].get(film.id, [])
             ]
             writers = [
-                Writer(id=id_, name=persons[id_].full_name)
+                WriterES(id=id_, name=persons[id_].full_name)
                 for id_ in data["film_writers"].get(film.id, [])
             ]
             transformed.append(
@@ -242,7 +242,7 @@ class ETL:
         self.extractor = extractor
         self.transformer = transformer
         self.loader = loader
-    
+
     @staticmethod
     def timeit(func: Callable) -> Callable:
         @wraps(func)
@@ -251,6 +251,7 @@ class ETL:
             result = func(self, *args, **kwargs)
             logger.info(f"Elapsed in: {time.time()-start} seconds")
             return result
+
         return inner
 
     def bulk_generator(self, bulk_size):
