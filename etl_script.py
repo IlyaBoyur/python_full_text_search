@@ -6,7 +6,7 @@ import sqlite3
 import time
 from dataclasses import dataclass, asdict
 from functools import wraps
-from typing import Any, Callable
+from typing import Any, Callable, Generator
 from dotenv import load_dotenv
 
 import requests
@@ -132,7 +132,7 @@ class SQLiteExtractor:
         }
         return result
 
-    def bulk_generator(self, bulk_size: int | None = None):
+    def bulk_generator(self, bulk_size: int | None = None) -> Generator[dict, None, None]:
         with self.connection as cursor:
             film_cursor = cursor.execute(
                 "SELECT id, title, description, rating FROM film_work;"
@@ -188,7 +188,7 @@ class SQLite2ESTransformer:
 
 
 class ESLoader:
-    def __init__(self, url="", index=""):
+    def __init__(self, url: str = "", index: str = "") -> None:
         self.url = url
         self.index = index
 
@@ -254,17 +254,17 @@ class ETL:
 
         return inner
 
-    def bulk_generator(self, bulk_size):
+    def bulk_generator(self, bulk_size) -> Generator[dict, None, None]:
         yield from self.extractor.bulk_generator(bulk_size=bulk_size)
 
-    def transform(self, data):
+    def transform(self, data) -> list:
         return self.transformer.transform(data=data)
 
-    def bulk_load(self, data):
+    def bulk_load(self, data) -> None:
         return self.loader.bulk_load(data=data)
 
     @timeit
-    def do(self):
+    def do(self) -> None:
         for bulk in self.bulk_generator(bulk_size=BULK_SIZE):
             self.bulk_load(self.transform(bulk))
 
